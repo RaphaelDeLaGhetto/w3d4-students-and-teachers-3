@@ -1,6 +1,6 @@
 class Teacher < ActiveRecord::Base
   validates_uniqueness_of :email
-  has_many :students
+  has_and_belongs_to_many :students
   validate :retirement_date_is_after_hire_date
   after_save :check_retirement_status
 
@@ -10,6 +10,6 @@ class Teacher < ActiveRecord::Base
     end
 
     def check_retirement_status
-      students.each { |student| student.teacher = nil; student.save } if retirement_date
+      students.each { |student| student.teachers.destroy(id) } if retirement_date
     end
 end

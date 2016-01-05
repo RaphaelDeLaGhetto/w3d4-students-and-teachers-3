@@ -86,15 +86,16 @@ describe Student do
     end
 
     it "won't register a student to a retired teacher" do
-      @student.teacher = Teacher.create!(hire_date: Date.yesterday, retirement_date: Date.today)
-      expect(@student).to_not be_valid
+      @student.save
+      teacher = Teacher.create!(hire_date: Date.yesterday, retirement_date: Date.today)
+      expect(@student.teachers.count).to eq(0)
+      expect{ @student.teachers << teacher }.to raise_error('That teacher retired')
+      expect(@student.teachers.count).to eq(0)
     end
   end
   
   context 'callbacks' do
     before(:each) do
-      @teacher = Teacher.create
-
       @student = Student.new(
         first_name: 'Kreay',
         last_name: 'Shawn',
@@ -106,12 +107,14 @@ describe Student do
     end
 
     it "updates last_student_added_at field in the new student's teacher record" do
-      expect(@teacher.last_student_added_at).to eq(nil)
+      teacher = Teacher.create!(email: 'daniel@capitolhill.ca')
+      expect(teacher.last_student_added_at).to eq(nil)
 
-      @student.teacher = @teacher
+      @student.save
+      @student.teachers << teacher
       @student.save
 
-      expect(@teacher.last_student_added_at).to eq(Date.today)
+      expect(teacher.last_student_added_at).to eq(Date.today)
     end
   end
 end

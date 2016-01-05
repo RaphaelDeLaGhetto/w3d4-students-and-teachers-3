@@ -24,13 +24,13 @@ ActiveRecord::Schema.define(version: 20160104233807) do
     t.datetime "updated_at"
   end
 
-  create_table "students_teachers", force: :cascade do |t|
-    t.integer "students_id"
-    t.integer "teachers_id"
+  create_table "students_teachers", id: false, force: :cascade do |t|
+    t.integer "student_id"
+    t.integer "teacher_id"
   end
 
-  add_index "students_teachers", ["students_id"], name: "index_students_teachers_on_students_id"
-  add_index "students_teachers", ["teachers_id"], name: "index_students_teachers_on_teachers_id"
+  add_index "students_teachers", ["student_id"], name: "index_students_teachers_on_student_id"
+  add_index "students_teachers", ["teacher_id"], name: "index_students_teachers_on_teacher_id"
 
   create_table "teachers", force: :cascade do |t|
     t.string   "name"
