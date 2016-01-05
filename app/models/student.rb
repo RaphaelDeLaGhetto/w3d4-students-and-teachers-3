@@ -1,6 +1,6 @@
 class Student < ActiveRecord::Base
   has_and_belongs_to_many :teachers, before_add: :teacher_status
-  # 2016-1-3 http://stackoverflow.com/questions/13784845/how-would-one-validate-the-format-of-an-email-field-in-activerecord
+  # 2016-1-2 http://stackoverflow.com/questions/13784845/how-would-one-validate-the-format-of-an-email-field-in-activerecord
   validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i
   validates_uniqueness_of :email
   validates_numericality_of :feedback, only_integer: true, allow_nil: true, greater_than: 0, less_than: 5
