@@ -3,9 +3,10 @@ class Student < ActiveRecord::Base
   # 2016-1-3 http://stackoverflow.com/questions/13784845/how-would-one-validate-the-format-of-an-email-field-in-activerecord
   validates_format_of :email, :with => /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i
   validates_uniqueness_of :email
+  validates_numericality_of :feedback, only_integer: true, allow_nil: true, greater_than: 0, less_than: 5
   validate :must_be_age_of_majority
-  validate :teacher_status
   after_save :notify_teachers
+  after_save :register_feedback, if: :feedback_changed?
 
   def name
     "#{first_name} #{last_name}"
@@ -24,6 +25,14 @@ class Student < ActiveRecord::Base
     def notify_teachers
       teachers.each do |teacher|
         teacher.last_student_added_at = Date.today
+        teacher.save
+      end
+    end
+
+    def register_feedback
+      teachers.each do |teacher|
+        teacher.rating = feedback if teacher.rating.nil?
+        teacher.rating = (feedback + teacher.rating)/2.0
         teacher.save
       end
     end

@@ -96,7 +96,7 @@ describe Student do
   
   context 'callbacks' do
     before(:each) do
-      @student = Student.new(
+      @student = Student.create!(
         first_name: 'Kreay',
         last_name: 'Shawn',
         birthday: Date.new(1989, 9, 24),
@@ -104,17 +104,55 @@ describe Student do
         email: 'kreayshawn@oaklandhiphop.net',
         phone: '(510) 555-1212 x4567'
       )
+      @teacher = Teacher.create!(email: 'daniel@capitolhill.ca')
     end
 
     it "updates last_student_added_at field in the new student's teacher record" do
-      teacher = Teacher.create!(email: 'daniel@capitolhill.ca')
-      expect(teacher.last_student_added_at).to eq(nil)
+      expect(@teacher.last_student_added_at).to eq(nil)
 
-      @student.save
-      @student.teachers << teacher
+      @student.teachers << @teacher
       @student.save
 
-      expect(teacher.last_student_added_at).to eq(Date.today)
+      expect(@teacher.last_student_added_at).to eq(Date.today)
+    end
+
+    it "sets the teacher rating if that teacher's rating is nil" do
+      expect(@teacher.rating).to eq(nil)
+
+      @student.teachers << @teacher
+      @student.feedback = 3
+      @student.save
+
+      expect(@teacher.rating).to eq(3)
+    end
+
+    it "recalculates teacher ratings when the feedback column is set" do
+      @teacher.rating = 3
+      @teacher.save
+
+      @student.teachers << @teacher
+      @student.feedback = 4
+      @student.save
+
+      expect(@teacher.rating).to eq(3.5)
+    end
+
+    it "updates all teacher ratings when the feedback column is set" do
+      @teacher.rating = 3
+      @teacher.save
+
+      teacher1 = Teacher.create!(email: 'teacher1@example.edu', rating: 1)
+      teacher2 = Teacher.create!(email: 'teacher2@example.edu', rating: 4)
+      teacher3 = Teacher.create!(email: 'teacher3@example.edu')
+
+      @student.teachers << @teacher << teacher1 << teacher2 << teacher3 
+      @student.feedback = 4
+      @student.save
+
+      expect(@teacher.rating).to eq(3.5)
+      expect(teacher1.rating).to eq(2.5)
+      expect(teacher2.rating).to eq(4)
+      expect(teacher3.rating).to eq(4)
     end
   end
 end
